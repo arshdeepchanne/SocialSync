@@ -6,6 +6,27 @@ Run Flask app:-
 flask run
 
 users table desc:-
-CREATE TABLE users(id INTEGER NOT NULL AUTO_INCREMENT, uid VARCHAR(20) NOT NULL, name text, hash TEXT NOT NULL, PRIMARY KEY(id));
-CREATE UNIQUE INDEX uid on users(uid);-
+CREATE TABLE users(
+    id INTEGER NOT NULL AUTO_INCREMENT, 
+    uid VARCHAR(15) NOT NULL, 
+    name text NOT NULL, 
+    hash TEXT NOT NULL, 
+    PRIMARY KEY(id)
+);
+
+CREATE UNIQUE INDEX uid on users(uid);
 ALTER TABLE users AUTO_INCREMENT=0;
+
+desc events:-
+CREATE TABLE events(
+    event_id INTEGER NOT NULL AUTO_INCREMENT, 
+    name TEXT NOT NULL, 
+    description TEXT NOT NULL,
+    category TEXT NOT NULL, 
+    event_time DATETIME NOT NULL,
+    creation_time DATETIME NOT NULL,
+    organiser_id INT NOT NULL, 
+    venue TEXT NOT NULL,
+    PRIMARY KEY(event_id), 
+    FOREIGN KEY(organiser_id) REFERENCES users(id)
+);

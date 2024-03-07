@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block main %}
+<div class="w3-row-padding">
+    <div class="w3-col m12">
+        <div class="w3-card w3-round w3-white">
+            <div class="w3-container w3-padding">
+                <h6 class="w3-opacity">Create an event</h6>
+                <form action="/create_event" method="post"  autocomplete="off" >
+
+                    <input type="text" name="ename" placeholder="Event Name" required autofocus class="w3-border w3-padding"><br>
+                    <input type="text" name="description" placeholder="Event Desciption" required class="w3-border w3-padding"><br>
+                    <input type="text" name="venue" placeholder="Location/Online" required class="w3-border w3-padding"><br>
+                    <input type="text" name="category" placeholder="Category" required class="w3-border w3-padding"><br>
+                    <input type="datetime-local" name="time" placeholder="Event time" required class="w3-border w3-padding"><br>
+
+                    <input type="submit" value="Create" class="w3-button w3-theme">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

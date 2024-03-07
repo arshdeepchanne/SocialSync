@@ -6,6 +6,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
+from datetime import datetime
 
 from helpers import apology, login_required
 
@@ -45,36 +46,37 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 @login_required
 def index():
-    # """Show portfolio of stocks"""
+    if request.method == 'POST':
+        ...
 
-    # # Query the database for logged in user's stock holdings
-    # portfolio = db.execute("SELECT symbol, total_shares FROM stocks WHERE user_id=?", session["user_id"])
+    else:
+        """
+        Create an event table having attributes- event_id, event_name, event_category, 
+        event_time, event_venue, event_organiser (foreign key user_id)
 
-    # # Query the database for logged in user's cash
-    # cash = db.execute("SELECT cash FROM users WHERE id=?", session["user_id"])
+        Create an attendee table having attribures- user_id, event_id (both foreign key)
 
-    # cash_left = cash[0]["cash"]
-
-    # # Look up the current price of each stock and calculate the total holdings of the user
-    # total_holdings = 0
-    # for stock in portfolio:
-    #     quote = lookup(stock["symbol"])
-    #     stock["name"] = quote["name"]
-    #     stock["price"] = quote["price"]
-    #     stock["total_hold"] = stock["price"] * stock["total_shares"]
-    #     total_holdings += stock["total_hold"]
-
-    # total_holdings += cash_left
-
-    # return render_template("index.html", portfolio=portfolio, cash=cash_left, total=total_holdings)
-    return render_template("index.html")
+        implement above in GET method, integrate AJAX later to update page dynamically.
+        POST method to work with 'Create Event'.
+        """
+        cursor.execute("SELECT uid, name from users where id=(%s)", (session["user_id"],))
+        user = cursor.fetchone()
+        print(user)
+        cursor.execute(
+            """select users.name as uname, 
+                    users.uid, users.name as uname, events.name as ename, 
+                        events.description, events.event_time, events.creation_time,
+                       events.venue from users, events where users.id = events.organiser_id"""
+        )
+        events = cursor.fetchall()
+        
+        return render_template("index.html", events=events, user=user)
 
 
 @app.route("/login", methods=["GET", "POST"])
-@app.route("/login")
 def login():
     """Log user in"""
 
@@ -96,8 +98,6 @@ def login():
         cursor.execute("SELECT * FROM users WHERE uid = (%s)", (request.form.get("uid"), ))
         rows = cursor.fetchall()
         print(rows)
-        cursor.execute("SELECT * FROM users")
-        print("here", cursor.fetchall())
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
             flash("Register if you haven't already!", category="error")
@@ -129,13 +129,13 @@ def logout():
 
 
 @app.route("/register", methods=["GET", "POST"])
-@app.route("/register")
 def register():
     """Register user"""
 
     if request.method == "POST":
 
         # Get the username, password and confirmation password from the HTML form.
+        name = request.form.get("username")
         uid = request.form.get("uid")
         password = request.form.get("password")
         confirm_pass = request.form.get("confirm_password")
@@ -163,7 +163,7 @@ def register():
             return apology("Passwords do not match")
 
         # Register the user.
-        cursor.execute("INSERT INTO users (uid, hash) VALUES(%s, %s)", (uid, generate_password_hash(password)))
+        cursor.execute("INSERT INTO users (uid, name, hash) VALUES(%s, %s, %s)", (uid, name, generate_password_hash(password)))
 
         # Query the database to get the id of the user.
         cursor.execute("SELECT id FROM users WHERE uid=(%s)", (uid, ))
@@ -179,6 +179,33 @@ def register():
 
     else:
         return render_template("register.html")
+
+
+@app.route("/create_event", methods=["GET", "POST"])
+@login_required
+def create_event():
+    if request.method == "POST":
+        ename = request.form.get("ename")
+        desc = request.form.get("description")
+        category = request.form.get("category")
+        event_time = request.form.get("time")
+        creation_time = datetime.now()
+        venue = request.form.get("venue")
+        
+        print("Time:",event_time, type(event_time))
+        # print(ename, desc, venue, category, event_time, creation_time, venue, sep="\n")
+
+        cursor.execute(
+            """INSERT INTO events (
+                name, description, category, event_time, creation_time, organiser_id, venue
+                ) VALUES(%s, %s, %s, %s, %s, %s, %s)""", 
+                (ename, desc, category, event_time, creation_time, session["user_id"], venue)
+        )
+        db.commit()
+        return redirect("/")
+    
+    else:
+        return render_template("create_event.html")
 
 
 # @app.route("/profile", methods=["GET", "POST"])
