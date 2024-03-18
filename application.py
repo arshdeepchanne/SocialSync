@@ -208,61 +208,12 @@ def create_event():
         return render_template("create_event.html")
 
 
-# @app.route("/profile", methods=["GET", "POST"])
-# @login_required
-# def profile():
-#     """SHOW USER PROFILE"""
-
-#     if request.method == "POST":
-
-#         old_pass = request.form.get("old_pass")
-#         new_pass = request.form.get("new_pass")
-#         confirm_pass = request.form.get("confirm_pass")
-
-#         user = db.execute("SELECT username, hash FROM users WHERE id = ?", session["user_id"])
-
-#         if not old_pass or old_pass == " ":
-#             return apology("Old password field is blank.")
-
-#         elif not check_password_hash(user[0]["hash"], old_pass):
-#             return apology("Old password is wrong!")
-
-#         elif not new_pass or not confirm_pass or new_pass == " " or confirm_pass == " ":
-#             return apology("New password field is blank")
-
-#         elif new_pass != confirm_pass:
-#             return apology("Confirmation password does not match with new password.")
-
-#         elif check_password_hash(user[0]["hash"], new_pass):
-#             return apology("New password cannot be same as the old password.")
-
-#         db.execute("UPDATE users SET hash=? WHERE id=?", generate_password_hash(new_pass), session["user_id"])
-
-#         flash("Password Updated!")
-
-#         return redirect("/")
-
-#     else:
-#         user = db.execute("SELECT username, hash FROM users WHERE id = ?", session["user_id"])
-#         return render_template("profile.html", user=user[0]["username"])
-
-
-# @app.route("/delete", methods=["POST"])
-# @login_required
-# def delete():
-#     if request.method == "POST":
-
-#         user = request.form.get("delete")
-
-#         db.execute("DELETE FROM stocks WHERE user_id=?", session["user_id"])
-
-#         db.execute("DELETE FROM transactions WHERE user_id=?", session["user_id"])
-
-#         db.execute("DELETE FROM users WHERE id=?", session["user_id"])
-
-#         flash("Account Deleted!")
-
-#         return redirect("/login")
+@app.route("/join_event", methods=["GET", "POST"])
+@login_required
+def join_event():
+    if request.method == "POST":
+        ...
+        redirect("/")
 
 
 def errorhandler(e):
