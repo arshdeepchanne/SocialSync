@@ -16,7 +16,7 @@ db = mysql.connector.connect(
   host="localhost",
   user="root",
   password="rootpassword",
-  database="meetgreet"
+  database="socialsync"
 )
 
 # Create cursor
@@ -53,27 +53,26 @@ def index():
         ...
 
     else:
-        """
-        Create an event table having attributes- event_id, event_name, event_category, 
-        event_time, event_venue, event_organiser (foreign key user_id)
-
-        Create an attendee table having attribures- user_id, event_id (both foreign key)
-
-        implement above in GET method, integrate AJAX later to update page dynamically.
-        POST method to work with 'Create Event'.
-        """
         cursor.execute("SELECT uid, name from users where id=(%s)", (session["user_id"],))
         user = cursor.fetchone()
         print(user)
         cursor.execute(
             """select users.name as uname, 
-                    users.uid, users.name as uname, events.name as ename, 
+                    users.uid, users.name as uname, event_id, events.name as ename, 
                         events.description, events.event_time, events.creation_time,
                        events.venue from users, events where users.id = events.organiser_id"""
         )
         events = cursor.fetchall()
         
-        return render_template("index.html", events=events, user=user)
+        cursor.execute(
+            """select name, event_time, venue from events 
+                where event_id in (
+                    select event_id from joinees where user_id=(%s))""", (session["user_id"],)
+            )
+        joined_events = cursor.fetchall()
+        print(joined_events)
+        
+        return render_template("index.html", events=events, user=user, joined_events=joined_events)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -212,9 +211,15 @@ def create_event():
 @login_required
 def join_event():
     if request.method == "POST":
-        ...
-        redirect("/")
+        event_id = request.form.get("form_id")
 
+        print("here")
+        cursor.execute("INSERT INTO joinees VALUES (%s, %s)", (session["user_id"], event_id))
+        db.commit()
+
+        print(f"{session["user_id"]} joined {event_id}")
+
+        return redirect("/")
 
 def errorhandler(e):
     """Handle error"""
