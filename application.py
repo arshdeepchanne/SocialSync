@@ -191,7 +191,7 @@ def create_event():
         creation_time = datetime.now()
         venue = request.form.get("venue")
         
-        print("Time:",event_time, type(event_time))
+        # print("Time:",event_time, type(event_time))
         # print(ename, desc, venue, category, event_time, creation_time, venue, sep="\n")
 
         cursor.execute(
